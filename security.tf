@@ -19,5 +19,16 @@ resource "openstack_compute_secgroup_v2" "terraform_ssh_ping_centos" {
     ip_protocol = "icmp"
     cidr        = "0.0.0.0/0"
   }
-
+  rule{
+    ip_protocol = "tcp"
+    from_port  =  "80"
+    to_port    =  "80"
+    cidr       = "0.0.0.0/0"
+  }
+  rule{
+    ip_protocol = "tcp"
+    from_port  =  "443"
+    to_port    =  "443"
+    cidr       = "0.0.0.0/0"
+  }
 }
