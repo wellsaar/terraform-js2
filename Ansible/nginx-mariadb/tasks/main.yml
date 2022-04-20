@@ -1,0 +1,51 @@
+---
+# tasks file for nginx
+
+- name: Installing NGINX and Mariadb
+  ansible.builtin.package:
+    name:
+    - nginx
+    - maradb-server
+    state: present
+
+- name: Copying over into sites-available
+  ansible.builtin.copy:
+    src: nginx-default-http
+    dest: /etc/nginx/sites-available/nginx-default
+
+- name: Generating Hello World!
+  ansible.builtin.copy:
+    src: hello_world.index
+    dest: "/var/www/html/index.html"
+    backup: yes
+    mode: "0755"
+  handler: restart nginx
+
+- name: Enabling site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/nginx-default
+    dest: /etc/nginx/sites-enabled/nginx-default
+    state: link
+  handler: restart nginx
+
+- name: Enabling UFW
+  community.general.ufw:
+    state: enabled
+
+- name: Rate limiting ssh
+  community.general.ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+
+- name: Allowing port 80
+  community.general.ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Allowing port 443
+  community.general.ufw:
+    rule: allow
+    port: '443'
+    proto: tcp

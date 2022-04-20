@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: true
+
+
+  tasks:
+  - name: Wait for apt to unlock
+    become: yes
+    shell:  while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 5; done;
+
+  - name: Install NGINX
+    package:
+      name: nginx
+      state: present
