@@ -1,0 +1,31 @@
+---
+name: CI
+'on':
+  pull_request:
+    push:
+      branches:
+        - master
+jobs:
+  test:
+    name: Molecule
+    runs-on:
+#need rhel and ubuntu
+    - ubuntu-latest
+
+    steps:
+      - name: checkout codebase
+        uses: actions/checkout@v2
+
+      - name: setup python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies
+        run: pip3 install ansible molecule[docker]
+
+      - name: Run Molecule test.
+        run: molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
