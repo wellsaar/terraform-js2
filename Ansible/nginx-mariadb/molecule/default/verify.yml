@@ -5,6 +5,7 @@
   hosts: all
   gather_facts: false
   tasks:
-  - name: Example assertion
-    assert:
-      that: true
+  - name: Checking if nginx is listening on port 80
+    uri:
+      url: http://localhost
+      status_code: 200
