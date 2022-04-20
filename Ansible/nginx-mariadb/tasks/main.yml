@@ -19,14 +19,14 @@
     dest: "/var/www/html/index.html"
     backup: yes
     mode: "0755"
-  handler: restart nginx
+  notify: restart nginx
 
 - name: Enabling site
   ansible.builtin.file:
     src: /etc/nginx/sites-available/nginx-default
     dest: /etc/nginx/sites-enabled/nginx-default
     state: link
-  handler: restart nginx
+  notify: restart nginx
 
 - name: Enabling UFW
   community.general.ufw:
