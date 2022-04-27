@@ -1,5 +1,0 @@
-{{ Ansible_Managed | comment }}
-<html>
-<head><title>Hello world!</title></head>
-<body>Hello World!</body>
-</html>
