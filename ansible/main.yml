@@ -1,0 +1,65 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Installing NGINX, Mariadb, and UFW
+      ansible.builtin.package:
+        name:
+        - nginx-core
+        - mariadb-server
+        - ufw
+        state: present
+
+    - name: Copying over into sites-available
+      ansible.builtin.template:
+        src: files/nginx-default-http.j2
+        dest: /etc/nginx/sites-available/nginx-default
+        mode: 0644
+
+    - name: Generating Hello World!
+      ansible.builtin.copy:
+        src: hello_world.index
+        dest: /var/www/html/index.html
+        backup: yes
+        mode: 0755
+      notify: restart NGINX
+
+    - name: Enabling site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/nginx-default
+        dest: /etc/nginx/sites-enabled/nginx-default
+        state: link
+      notify: restart NGINX
+
+    - name: Making sure nginx is started.
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Enabling UFW
+      community.general.ufw:
+        state: enabled
+
+    - name: Rate limiting ssh
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+
+    - name: Allowing port 80
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Allowing port 443
+      community.general.ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+  handlers:
+    - name: restart NGINX
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
