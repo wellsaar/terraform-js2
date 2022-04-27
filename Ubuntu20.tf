@@ -3,6 +3,17 @@
 ################
 # creating leader
 
+resource "openstack_networking_floatingip_v2" "terraform_floatip_ubuntu20" {
+  pool = "public"
+}
+
+# assigning floating ip from public pool to Ubuntu20 VM
+resource "openstack_compute_floatingip_associate_v2" "Ubuntu20_float" {
+  floating_ip = "${openstack_networking_floatingip_v2.terraform_floatip_ubuntu20.address}"
+  instance_id = "${openstack_compute_instance_v2.Ubuntu20.id}"
+  wait_until_associated = true
+}
+
 resource "openstack_compute_instance_v2" "Ubuntu20" {
   name = "terraform_Ubuntu20"
   # ID of JS-API-Featured-Ubuntu20-Latest
