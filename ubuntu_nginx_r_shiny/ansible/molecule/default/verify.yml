@@ -1,0 +1,11 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Testing if apache is listening on port 80
+      ansible.builtin.uri:
+        url: http://localhost
+        return_content: yes

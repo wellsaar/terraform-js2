@@ -1,0 +1,65 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Installing NGINX, Mariadb, and UFW
+      package:
+        name:
+        - nginx-core
+        - mariadb-server
+        - ufw
+        state: present
+
+    - name: Copying over into sites-available
+      template:
+        src: files/nginx-default-http.j2
+        dest: /etc/nginx/sites-available/nginx-default
+        mode: 0644
+
+    - name: Generating Hello World!
+      copy:
+        src: hello_world.index
+        dest: /var/www/html/index.html
+        backup: yes
+        mode: 0755
+      notify: restart NGINX
+
+    - name: Enabling site
+      file:
+        src: /etc/nginx/sites-available/nginx-default
+        dest: /etc/nginx/sites-enabled/nginx-default
+        state: link
+      notify: restart NGINX
+
+    - name: Making sure nginx is started.
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Enabling UFW
+      ufw:
+        state: enabled
+
+    - name: Rate limiting ssh
+      ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+
+    - name: Allowing port 80
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Allowing port 443
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+  handlers:
+    - name: restart NGINX
+      service:
+        name: nginx
+        state: restarted
