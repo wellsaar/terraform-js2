@@ -44,7 +44,7 @@ resource "null_resource" "ansible_provisioners" {
       }
   }
   provisioner "file" {
-    source = "ansible"
+    source = "../ansible"
     destination = "ansible"
   }
       connection {
