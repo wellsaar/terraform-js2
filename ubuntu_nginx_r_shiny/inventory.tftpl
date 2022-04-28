@@ -1,0 +1,4 @@
+[leader]
+%{ for ip in ubuntu20 }
+${ip} ansible_connection=ssh        ansible_user=ubuntu
+%{ endfor ~}
