@@ -35,6 +35,7 @@ resource "openstack_compute_instance_v2" "Ubuntu20" {
 resource "null_resource" "ansible_provisioners" {
   provisioner "remote-exec" {
     inline = [
+
       "sudo apt install python3 ansible -y",
     ]
       connection {
