@@ -2,12 +2,19 @@
 - hosts: all
   become: true
   tasks:
+    - name: Adding R repo
+      apt_repo:
+        repo: ppa:c2d4u.team/c2d4u4.0+
+        state: present
+        update: true
+
     - name: Installing NGINX, Mariadb, and UFW
       package:
         name:
         - nginx-core
-        - mariadb-server
         - ufw
+        - r-base
+        - gdebi-core
         state: present
 
     - name: Copying over into sites-available
