@@ -1,6 +1,8 @@
 ---
 - hosts: all
   become: true
+  vars:
+    shiny_version: 1.5.18.987
   tasks:
     - name: Adding R repo
       apt_repo:
@@ -16,6 +18,15 @@
         - r-base
         - gdebi-core
         state: present
+    - name: Downloading shiny-server-{{ shiny_version }}
+      get_url:
+        url: "https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-{{ shiny_version }}-amd64.deb"
+        dest: /home/ubuntu/
+    - name: Installing shiny R packages
+      command: R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\
+
+    - name: Installing shiny-server {{ shiny_version }}
+      command: gdebi shiny-server-{{ shiny_version }}-amd64.deb
 
     - name: Copying over into sites-available
       template:
