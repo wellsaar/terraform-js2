@@ -6,10 +6,14 @@
     - name: "Include Ansible"
       ansible.builtin.include_role:
         name: "Ansible"
-        
+
     - name: Update apt cache (on Debian).
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
       when: ansible_os_family == 'Debian'
+    - name: Installing gpg-agent
+      ansible.builtin.apt:
+        name: gpg-agent
+        state: present
 - import_playbook: ../../main.yml
