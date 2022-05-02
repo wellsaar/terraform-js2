@@ -15,8 +15,11 @@
         state: present
         update_cache: true
 
+    - name: Wait for any possibly running unattended upgrade to finish
+      raw: systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true
+
     - name: Installing NGINX, Mariadb, and UFW
-      package:
+      apt:
         name:
         - nginx-core
         - ufw
@@ -24,35 +27,42 @@
         - gdebi-core
         state: present
 
+    - name: Installing shiny R packages
+      command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
+
     - name: Downloading shiny-server-{{ shiny_version }}
       get_url:
         url: "https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-{{ shiny_version }}-amd64.deb"
         dest: /opt/shiny-server-{{ shiny_version }}-amd64.deb
 
-    - name: Installing shiny R packages
-      command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
-
     - name: Installing shiny-server {{ shiny_version }}
-      command: gdebi /opt/shiny-server-{{ shiny_version }}-amd64.deb
+      apt:
+        deb: /opt/shiny-server-{{ shiny_version }}-amd64.deb
+      register: 'apt_status'
+      until: 'apt_status is success'
+      delay: 10
+      retries: 60
 
-    - name: Copying over into sites-available
+    - name: Making sure shiny-server is started and enabled on boot.
+      service:
+        name: shiny-server
+        state: started
+        enabled: true
+
+    - name: Removing default nginx config
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+    - name: Copying shiny.conf into sites-available
       template:
-        src: files/nginx-default-http.j2
-        dest: /etc/nginx/sites-available/nginx-default
+        src: files/shiny.conf
+        dest: /etc/nginx/sites-available/shiny
         mode: 0644
-
-    - name: Generating Hello World!
-      copy:
-        src: hello_world.index
-        dest: /var/www/html/index.html
-        backup: yes
-        mode: 0755
-      notify: restart NGINX
 
     - name: Enabling site
       file:
-        src: /etc/nginx/sites-available/nginx-default
-        dest: /etc/nginx/sites-enabled/nginx-default
+        src: /etc/nginx/sites-available/shiny
+        dest: /etc/nginx/sites-enabled/shiny
         state: link
       notify: restart NGINX
 
@@ -83,8 +93,13 @@
         rule: allow
         port: '443'
         proto: tcp
+
   handlers:
     - name: restart NGINX
       service:
         name: nginx
+        state: restarted
+    - name: restart shiny-server
+      service:
+        name: shiny-server
         state: restarted
