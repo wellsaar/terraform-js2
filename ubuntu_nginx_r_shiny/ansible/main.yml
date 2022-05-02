@@ -4,11 +4,16 @@
   vars:
     shiny_version: 1.5.18.987
   tasks:
-    - name: Adding R repo
-      apt_repo:
-        repo: ppa:c2d4u.team/c2d4u4.0+
+    - name: Adding R repo's public key
+      apt_key:
+        url: https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc
         state: present
-        update: true
+
+    - name: Adding R repo
+      apt_repository:
+        repo: deb https://cloud.r-project.org/bin/linux/ubuntu {{ ansible_distribution_release }}-cran40/
+        state: present
+        update_cache: true
 
     - name: Installing NGINX, Mariadb, and UFW
       package:
@@ -18,15 +23,17 @@
         - r-base
         - gdebi-core
         state: present
+
     - name: Downloading shiny-server-{{ shiny_version }}
       get_url:
         url: "https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-{{ shiny_version }}-amd64.deb"
-        dest: /home/ubuntu/
+        dest: /opt/shiny-server-{{ shiny_version }}-amd64.deb
+
     - name: Installing shiny R packages
-      command: R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\
+      command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
 
     - name: Installing shiny-server {{ shiny_version }}
-      command: gdebi shiny-server-{{ shiny_version }}-amd64.deb
+      command: gdebi /opt/shiny-server-{{ shiny_version }}-amd64.deb
 
     - name: Copying over into sites-available
       template:
