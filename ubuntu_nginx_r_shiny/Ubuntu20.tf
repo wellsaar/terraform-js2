@@ -38,6 +38,7 @@ resource "null_resource" "ansible_provisioners" {
       "sudo cloud-init status --wait",
       "sudo apt update",
       "sudo apt install python3 ansible -y",
+      "rm -rf ~/ansible"
     ]
       connection {
         type = "ssh"
