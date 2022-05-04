@@ -104,6 +104,43 @@
         port: '443'
         proto: tcp
 
+    - name: grabbing FQDN via curl
+      uri:
+        url: http://whatismyhostname.com/raw/hostname/
+        return_content: true
+      register: fqdn
+
+    - name: Generating private key for ACME
+      openssl_privatekey:
+        path: "{{ ssl_private_key }}"
+
+    - name: Generating CSR for ACME
+      openssl_csr:
+        path: "{{ ssl_csr }}"
+        privatekey_path: "{{ ssl_private_key }}"
+
+    - name: Creating a HTTP challenge
+      acme_certificate:
+        account_key_content: "{{ ssl_private_key }}"
+        csr: "{{ ssl_csr }}"
+        dest: "{{ ssl_public_cert }}"
+      register: challenge
+
+    - name: copying challenge data into file
+      copy:
+        dest: /var/www/html/{{ challenge['challenge_data'][{{ fqdn }}]['http-01']['resource'] }}
+        content: "{{ challenge['challenge_data'][{{ fqdn }}]['http-01']['resource_value'] }}"
+      when: challenge is changed and '"{{ fqdn }}"' in challenge['challenge_data']
+
+    - name: Validating challenge and generating certificate
+      acme_certificate:
+        account_key_src: "{{ ssl_private_key }}"
+        csr: "{{ ssl_csr }}"
+        dest: "{{ ssl_public_cert }}"
+        fullchain_dest: "{{ ssl_fullchain }}"
+        chain_dest: "{{ ssl_inter_chain }}"
+        data: "{{ challenge }}"
+
   handlers:
     - name: restart NGINX
       service:
