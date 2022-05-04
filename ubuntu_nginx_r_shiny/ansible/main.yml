@@ -3,6 +3,12 @@
   become: true
   vars:
     shiny_version: 1.5.18.987
+    ssl_path: /etc/http/ssl/
+    ssl_csr: /etc/http/ssl/acme.csr
+    ssl_private_key: /etc/http/ssl/acme.pem
+    ssl_public_cert: /etc/http/ssl/acme_public.pem
+    ssl_fullchain: /etc/http/ssl/fullchain.crt
+    ssl_inter_chain: /etc/http/ssl/intermediate.crt
   tasks:
     - name: Adding R repo's public key
       apt_key:
@@ -56,6 +62,7 @@
       file:
         path: /etc/nginx/sites-enabled/default
         state: absent
+
     - name: Copying shiny.conf into sites-available
       template:
         src: files/shiny.conf
