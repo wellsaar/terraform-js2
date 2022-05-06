@@ -3,13 +3,14 @@
   become: true
   vars:
     shiny_version: 1.5.18.987
-    ssl_path: /etc/http/ssl/
-    ssl_csr: /etc/http/ssl/acme.csr
-    ssl_private_key: /etc/http/ssl/acme.pem
-    ssl_public_cert: /etc/http/ssl/acme_public.pem
-    ssl_fullchain: /etc/http/ssl/fullchain.crt
-    ssl_inter_chain: /etc/http/ssl/intermediate.crt
+    ssl_email: "{{ lookup('file', '~/ansible/email.txt') }}"
+
   tasks:
+    - name: Grabbing FQDN via curl
+      command:
+        cmd: curl http://whatismyhostname.com/raw/hostname/
+        warn: false
+      register: hostname
     - name: Adding R repo's public key
       apt_key:
         url: https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc
@@ -32,6 +33,32 @@
         - r-base
         - gdebi-core
         state: present
+    - name: Installing core and certbot
+      snap:
+        name:
+          - core
+          - certbot
+        classic: true
+
+    - name: Register certbot
+      shell: |
+        certbot -n register --agree-tos --email "{{ ssl_email }}"
+        touch /etc/letsencrypt/.registered
+      args:
+        creates: /etc/letsencrypt/.registered
+
+    - name: Setup cronjob for renewal
+      cron:
+        name: certbot-renewal
+        job: "/bin/bash -lc '/usr/local/bin/certbot -q renew'"
+        minute: "0"
+        hour: "14"
+
+    - name: 'Get certificate'
+      command: certbot -n --nginx certonly -d {{ hostname.stdout }}
+      args:
+        creates: '/etc/letsencrypt/live/{{ hostname.stdout }}'
+      ignore_errors: true
 
     - name: Installing shiny R packages
       command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
@@ -104,42 +131,7 @@
         port: '443'
         proto: tcp
 
-    - name: grabbing FQDN via curl
-      uri:
-        url: http://whatismyhostname.com/raw/hostname/
-        return_content: true
-      register: fqdn
 
-    - name: Generating private key for ACME
-      openssl_privatekey:
-        path: "{{ ssl_private_key }}"
-
-    - name: Generating CSR for ACME
-      openssl_csr:
-        path: "{{ ssl_csr }}"
-        privatekey_path: "{{ ssl_private_key }}"
-
-    - name: Creating a HTTP challenge
-      acme_certificate:
-        account_key_content: "{{ ssl_private_key }}"
-        csr: "{{ ssl_csr }}"
-        dest: "{{ ssl_public_cert }}"
-      register: challenge
-
-    - name: copying challenge data into file
-      copy:
-        dest: /var/www/html/{{ challenge['challenge_data'][{{ fqdn }}]['http-01']['resource'] }}
-        content: "{{ challenge['challenge_data'][{{ fqdn }}]['http-01']['resource_value'] }}"
-      when: challenge is changed and '"{{ fqdn }}"' in challenge['challenge_data']
-
-    - name: Validating challenge and generating certificate
-      acme_certificate:
-        account_key_src: "{{ ssl_private_key }}"
-        csr: "{{ ssl_csr }}"
-        dest: "{{ ssl_public_cert }}"
-        fullchain_dest: "{{ ssl_fullchain }}"
-        chain_dest: "{{ ssl_inter_chain }}"
-        data: "{{ challenge }}"
 
   handlers:
     - name: restart NGINX
