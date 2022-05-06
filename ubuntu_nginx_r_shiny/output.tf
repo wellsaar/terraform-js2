@@ -16,3 +16,8 @@ resource "local_file" "ansible_inventory" {
   )
   filename  = "ansible/inventory.ini"
 }
+
+resource "local_file" "email" {
+  content = var.email
+  filename  = "ansible/email.txt"
+}

@@ -11,3 +11,7 @@ variable "flavor_id" {
 variable "key_pair" {
   default = ""
 }
+
+variable "email" {
+  default = ""
+}
