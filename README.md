@@ -15,7 +15,7 @@ Ubuntu server with Nginx and mongo/maria db installed.
 1. setup ubuntu 20
 2. make sure system is up to date
 3. install nginx
-4. install mongo,maria {bind to localhost}, and setup ufw firewall
+4. install mongo,maria {bound to localhost}, and setup ufw firewall
 6. limit firewall to 80,443,22
 
 ### Instance 2
