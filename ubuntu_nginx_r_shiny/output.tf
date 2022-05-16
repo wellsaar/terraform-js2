@@ -21,3 +21,8 @@ resource "local_file" "email" {
   content = var.email
   filename  = "ansible/email.txt"
 }
+
+resource "local_file" "domain_name" {
+  content = var.domain_name
+  filename  = "ansible/domain_name.txt"
+}

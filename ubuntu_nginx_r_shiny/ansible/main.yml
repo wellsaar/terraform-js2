@@ -4,6 +4,7 @@
   vars:
     shiny_version: 1.5.18.987
     ssl_email: "{{ lookup('file', '~/ansible/email.txt') }}"
+    domain_name: "{{ lookup('file', '~/ansible/domain_name.txt') }}"
 
   tasks:
     - name: Grabbing FQDN via curl
@@ -11,6 +12,8 @@
         cmd: curl http://whatismyhostname.com/raw/hostname/
         warn: false
       register: hostname
+      when: domain_name == ""
+
     - name: Adding R repo's public key
       apt_key:
         url: https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc
@@ -21,6 +24,7 @@
         repo: deb https://cloud.r-project.org/bin/linux/ubuntu {{ ansible_distribution_release }}-cran40/
         state: present
         update_cache: true
+
 
     - name: Wait for any possibly running unattended upgrade to finish
       raw: systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true
@@ -33,6 +37,7 @@
         - r-base
         - gdebi-core
         state: present
+
     - name: Installing core and certbot
       snap:
         name:
@@ -54,11 +59,19 @@
         minute: "0"
         hour: "14"
 
-    - name: 'Get certificate'
+    - name: 'Get certificate for {{ hostname.stdout }}'
       command: certbot -n --nginx certonly -d {{ hostname.stdout }}
       args:
         creates: '/etc/letsencrypt/live/{{ hostname.stdout }}'
       ignore_errors: true
+      when: domain_name == ""
+
+    - name: 'Get certificate for {{ domain_name }}'
+      command: certbot -n --nginx certonly -d {{ domain_name }}
+      args:
+        creates: '/etc/letsencrypt/live/{{ domain_name }}'
+      ignore_errors: true
+      when: domain_name != ""
 
     - name: Installing shiny R packages
       command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
@@ -130,8 +143,6 @@
         rule: allow
         port: '443'
         proto: tcp
-
-
 
   handlers:
     - name: restart NGINX
