@@ -30,7 +30,7 @@ resource "openstack_compute_instance_v2" "Ubuntu20" {
     name = "terraform_network"
   }
 
-  depends_on = [openstack_networking_network_v2.terraform_network]
+  depends_on = [openstack_networking_network_v2.terraform_network_nginx]
 }
 
 resource "null_resource" "ansible_provisioners" {
