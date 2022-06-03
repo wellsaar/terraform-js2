@@ -17,7 +17,8 @@ resource "openstack_compute_floatingip_associate_v2" "Ubuntu20_float" {
 resource "openstack_compute_instance_v2" "Ubuntu20" {
   name = "terraform_Ubuntu20"
   # ID of JS-API-Featured-Ubuntu20-Latest
-  image_id  = var.image_id
+  #image_id  = var.image_id
+  image_name = "Featured-Ubuntu20"
   flavor_id = var.flavor_id
   # you'll need to set this to your public key name on jetstream
   key_pair  = var.key_pair
@@ -29,7 +30,7 @@ resource "openstack_compute_instance_v2" "Ubuntu20" {
     name = "terraform_network"
   }
 
-  depends_on = [openstack_networking_network_v2.terraform_network]
+  depends_on = [openstack_networking_network_v2.terraform_network_r_shiny]
 }
 
 resource "null_resource" "ansible_provisioners" {
