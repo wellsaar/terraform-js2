@@ -22,9 +22,10 @@ resource "openstack_compute_instance_v2" "Ubuntu20" {
   flavor_id = var.flavor_id
   # you'll need to set this to your public key name on jetstream
   key_pair  = var.key_pair
-  security_groups   = ["terraform_ssh_ping_http_https", "default"]
+  security_groups   = ["terraform_ssh_ping_http_https_nginx", "default"]
   metadata = {
     terraform_controlled = "yes"
+    terraform_role = "nginx_mariadb"
   }
   network {
     name = "terraform_network"
