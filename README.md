@@ -6,7 +6,7 @@ jetstream related instances.
 ## How to use
 
 1. git checkout git@github.com:wellsaar/terraform-js2.git
-2. Edit ubuntu20.tfvars to set the name of your jetstream keypair and email address if needed
+2. Review ubuntu20.tfvars to set the name of your jetstream keypair and email address as well as domain name if needed.
 3. Run ``` terraform apply -var-file="ubuntu20.tfvars"``` and review the changes
 
 ### Instance 1
