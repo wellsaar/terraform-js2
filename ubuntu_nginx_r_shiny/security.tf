@@ -2,8 +2,8 @@
 #Security section
 ################
 #creating security group
-resource "openstack_compute_secgroup_v2" "terraform_ssh_ping_http_https" {
-  name = "terraform_ssh_ping_http_https"
+resource "openstack_compute_secgroup_v2" "terraform_ssh_ping_http_https_r_shiny" {
+  name = "terraform_ssh_ping_http_https_r_shiny"
   description = "Security group with SSH,PING,HTTP/HTTPS open to 0.0.0.0/0"
 
   #ssh rule
