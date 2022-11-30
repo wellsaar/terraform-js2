@@ -8,4 +8,4 @@ terraform {
   }
 }
 
-provider "openstack" { }
+provider "openstack" {}
