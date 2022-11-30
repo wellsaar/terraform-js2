@@ -21,10 +21,6 @@ data "openstack_identity_auth_scope_v3" "self_lookup" {
   name = "self_lookup"
 }
 
-output "project_name" {
-  value = data.openstack_identity_auth_scope_v3.self_lookup.project_name
-}
-
 output "url" {
   value = "http://${openstack_compute_instance_v2.ubuntu22.name}.${data.openstack_identity_auth_scope_v3.self_lookup.project_name}.projects.jetstream-cloud.org"
 }
