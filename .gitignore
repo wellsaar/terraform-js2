@@ -34,3 +34,4 @@ override.tf.json
 *openrc.sh
 *.sh
 *inventory.ini
+.DS_STORE
