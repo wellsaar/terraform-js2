@@ -2,35 +2,35 @@
 - hosts: all
   become: true
   vars:
-    shiny_version: 1.5.18.987
+    shiny_version: 1.5.19.995
     ssl_email: "{{ lookup('file', '~/ansible/email.txt') }}"
     domain_name: "{{ lookup('file', '~/ansible/domain_name.txt') }}"
 
   tasks:
     - name: Grabbing FQDN via curl
-      command:
+      ansible.builtin.command:
         cmd: curl http://whatismyhostname.com/raw/hostname/
         warn: false
       register: hostname
       when: domain_name == ""
 
     - name: Adding R repo's public key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc
         state: present
 
     - name: Adding R repo
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: deb https://cloud.r-project.org/bin/linux/ubuntu {{ ansible_distribution_release }}-cran40/
         state: present
         update_cache: true
 
 
     - name: Wait for any possibly running unattended upgrade to finish
-      raw: systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true
+      ansible.builtin.raw: systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true
 
     - name: Installing NGINX, Mariadb, and UFW
-      apt:
+      ansible.builtin.apt:
         name:
         - nginx-core
         - ufw
@@ -39,53 +39,53 @@
         state: present
 
     - name: Installing core and certbot
-      snap:
+      ansible.builtin.snap:
         name:
           - core
           - certbot
         classic: true
 
     - name: Register certbot
-      shell: |
+      ansible.builtin.shell: |
         certbot -n register --agree-tos --email "{{ ssl_email }}"
         touch /etc/letsencrypt/.registered
       args:
         creates: /etc/letsencrypt/.registered
 
     - name: Setup cronjob for renewal
-      cron:
+      ansible.builtin.cron:
         name: certbot-renewal
         job: "/bin/bash -lc '/usr/local/bin/certbot -q renew'"
         minute: "0"
         hour: "14"
 
     - name: 'Get certificate for {{ hostname.stdout }}'
-      command: certbot -n --nginx certonly -d {{ hostname.stdout }}
+      ansible.builtin.command: certbot -n --nginx certonly -d {{ hostname.stdout }}
       args:
         creates: '/etc/letsencrypt/live/{{ hostname.stdout }}'
       ignore_errors: true
       when: domain_name == ""
 
     - name: 'Get certificate for {{ domain_name }}'
-      command: certbot -n --nginx certonly -d {{ domain_name }}
+      ansible.builtin.command: certbot -n --nginx certonly -d {{ domain_name }}
       args:
         creates: '/etc/letsencrypt/live/{{ domain_name }}'
       ignore_errors: true
       when: domain_name != ""
 
     - name: Installing shiny R packages
-      command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
+      ansible.builtin.command: "R -e \"install.packages('shiny', repos='https://cran.rstudio.com/')\""
 
     - name: Installing rmarkdown R packages
-      command: "R -e \"install.packages('rmarkdown', repos='https://cran.rstudio.com/')\""
+      ansible.builtin.command: "R -e \"install.packages('rmarkdown', repos='https://cran.rstudio.com/')\""
 
     - name: Downloading shiny-server-{{ shiny_version }}
-      get_url:
+      ansible.builtin.get_url:
         url: "https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-{{ shiny_version }}-amd64.deb"
         dest: /opt/shiny-server-{{ shiny_version }}-amd64.deb
 
     - name: Installing shiny-server {{ shiny_version }}
-      apt:
+      ansible.builtin.apt:
         deb: /opt/shiny-server-{{ shiny_version }}-amd64.deb
       register: 'apt_status'
       until: 'apt_status is success'
@@ -93,63 +93,63 @@
       retries: 60
 
     - name: Making sure shiny-server is started and enabled on boot.
-      service:
+      ansible.builtin.service:
         name: shiny-server
         state: started
         enabled: true
 
     - name: Removing default nginx config
-      file:
+      ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
 
     - name: Copying shiny.conf into sites-available
-      template:
+      ansible.builtin.template:
         src: files/shiny.conf
         dest: /etc/nginx/sites-available/shiny
         mode: 0644
 
     - name: Enabling site
-      file:
+      ansible.builtin.file:
         src: /etc/nginx/sites-available/shiny
         dest: /etc/nginx/sites-enabled/shiny
         state: link
       notify: restart NGINX
 
     - name: Making sure nginx is started.
-      service:
+      ansible.builtin.service:
         name: nginx
         state: started
         enabled: true
 
     - name: Enabling UFW
-      ufw:
+      ansible.builtin.ufw:
         state: enabled
 
     - name: Rate limiting ssh
-      ufw:
+      ansible.builtin.ufw:
         rule: limit
         port: ssh
         proto: tcp
 
     - name: Allowing port 80
-      ufw:
+      ansible.builtin.ufw:
         rule: allow
         port: '80'
         proto: tcp
 
     - name: Allowing port 443
-      ufw:
+      ansible.builtin.ufw:
         rule: allow
         port: '443'
         proto: tcp
 
   handlers:
     - name: restart NGINX
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
     - name: restart shiny-server
-      service:
+      ansible.builtin.service:
         name: shiny-server
         state: restarted
