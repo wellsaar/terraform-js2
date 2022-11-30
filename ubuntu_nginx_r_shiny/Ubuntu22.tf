@@ -67,3 +67,7 @@ resource "null_resource" "ansible_provisioners" {
 
   depends_on = [openstack_compute_floatingip_associate_v2.Ubuntu22_float]
 }
+
+data "openstack_identity_auth_scope_v3" "self_lookup" {
+  name = "self_lookup"
+}
