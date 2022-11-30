@@ -12,5 +12,6 @@ variable "email" {
 }
 
 variable "domain_name" {
-  default = ""
+  default = "${openstack_compute_instance_v2.Ubuntu22.name}.${data.openstack_identity_auth_scope_v3.self_lookup.project_name}.projects.jetstream-cloud.org"
 }
+
