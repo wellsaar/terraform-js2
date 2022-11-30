@@ -3,26 +3,31 @@
 ################
 
 
-output "floating_ip_ubuntu20" {
-  value = openstack_networking_floatingip_v2.terraform_floatip_ubuntu20.address
-  description = "Public IP for Ubuntu 20"
+output "floating_ip_ubuntu22" {
+  value       = openstack_networking_floatingip_v2.terraform_floatip_ubuntu22.address
+  description = "Public IP for Ubuntu 22"
 }
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tftpl",
-  {
-    ubuntu20    = openstack_networking_floatingip_v2.terraform_floatip_ubuntu20.*.address,
-  }
+    {
+      ubuntu20 = openstack_networking_floatingip_v2.terraform_floatip_ubuntu22.*.address,
+    }
   )
-  filename  = "ansible/inventory.ini"
+  filename = "ansible/inventory.ini"
 }
 
 resource "local_file" "email" {
-  content = var.email
-  filename  = "ansible/email.txt"
+  content  = var.email
+  filename = "ansible/email.txt"
 }
 
 resource "local_file" "domain_name" {
-  content = var.domain_name
-  filename  = "ansible/domain_name.txt"
+  content  = var.domain_name
+  filename = "ansible/domain_name.txt"
+}
+
+output "url" {
+  value       = var.domain_name
+  description = "Domain name set in .auto.tfvarts"
 }
