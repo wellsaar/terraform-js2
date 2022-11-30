@@ -2,33 +2,50 @@
 #Security section
 ################
 #creating security group
-resource "openstack_compute_secgroup_v2" "terraform_ssh_ping_http_https_r_shiny" {
-  name = "terraform_ssh_ping_http_https_r_shiny"
-  description = "Security group with SSH,PING,HTTP/HTTPS open to 0.0.0.0/0"
 
-  #ssh rule
-  rule{
-    ip_protocol = "tcp"
-    from_port  =  "22"
-    to_port    =  "22"
-    cidr       = "0.0.0.0/0"
-  }
-  rule {
-    from_port   = -1
-    to_port     = -1
-    ip_protocol = "icmp"
-    cidr        = "0.0.0.0/0"
-  }
-  rule{
-    ip_protocol = "tcp"
-    from_port  =  "80"
-    to_port    =  "80"
-    cidr       = "0.0.0.0/0"
-  }
-  rule{
-    ip_protocol = "tcp"
-    from_port  =  "443"
-    to_port    =  "443"
-    cidr       = "0.0.0.0/0"
-  }
+resource "openstack_networking_secgroup_v2" "ssh_ping_security_group" {
+  name        = "SSH and ICMP Ingress"
+  description = "This allows ssh and ICMP packets into the instance"
+}
+
+resource "openstack_networking_secgroup_rule_v2" "ssh_security_rule" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.ssh_ping_security_group.id
+}
+
+resource "openstack_networking_secgroup_rule_v2" "ICMP_security_rule" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.ssh_ping_security_group.id
+}
+
+resource "openstack_networking_secgroup_v2" "http_https_security_group" {
+  name        = "HTTP/HTTPS Ingress"
+  description = "This allows http (80) and https (443) traffic into the instance."
+}
+
+resource "openstack_networking_secgroup_rule_v2" "http_security_rule" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 80
+  port_range_max    = 80
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.http_https_security_group.id
+}
+resource "openstack_networking_secgroup_rule_v2" "https_security_rule" {
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 443
+  port_range_max    = 443
+  remote_ip_prefix  = "0.0.0.0/0"
+  security_group_id = openstack_networking_secgroup_v2.http_https_security_group.id
 }
