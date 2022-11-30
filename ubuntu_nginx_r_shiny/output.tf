@@ -28,6 +28,5 @@ resource "local_file" "domain_name" {
 }
 
 output "url" {
-  value       = var.domain_name
-  description = "Domain name set in .auto.tfvarts"
+  value = "https://${openstack_compute_instance_v2.Ubuntu22.name}.${data.openstack_identity_auth_scope_v3.self_lookup.project_name}.projects.jetstream-cloud.org"
 }
