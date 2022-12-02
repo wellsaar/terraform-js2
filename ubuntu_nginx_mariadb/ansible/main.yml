@@ -3,37 +3,43 @@
   become: true
   tasks:
     - name: Installing NGINX, Mariadb, and UFW
-      package:
+      ansible.builtin.package:
         name:
-        - nginx-core
+        - "nginx-core"
         - mariadb-server
         - ufw
         state: present
 
     - name: Copying over into sites-available
-      template:
+      ansible.builtin.template:
         src: files/nginx-default-http.j2
         dest: /etc/nginx/sites-available/nginx-default
         mode: 0644
 
     - name: Generating Hello World!
-      copy:
+      ansible.builtin.copy:
         src: hello_world.index
         dest: /var/www/html/index.html
-        backup: yes
+        backup: true
         mode: 0755
       notify: restart NGINX
 
     - name: Enabling site
-      file:
+      ansible.builtin.file:
         src: /etc/nginx/sites-available/nginx-default
         dest: /etc/nginx/sites-enabled/nginx-default
         state: link
       notify: restart NGINX
 
     - name: Making sure nginx is started.
-      service:
+      ansible.builtin.service:
         name: nginx
+        state: started
+        enabled: true
+
+    - name: Enabling Mariadb
+      ansible.builtin.service:
+        name: mariadb
         state: started
         enabled: true
 
@@ -58,8 +64,9 @@
         rule: allow
         port: '443'
         proto: tcp
+
   handlers:
     - name: restart NGINX
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
