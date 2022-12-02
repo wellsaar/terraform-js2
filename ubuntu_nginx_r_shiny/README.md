@@ -1,7 +1,7 @@
 ## How to use
 
 1. git checkout git@github.com:wellsaar/terraform-js2.git
-2. Edit ubuntu22.auto.tfvars to set the name of your jetstream keypair as well as your project allocation
+2. Edit Ubuntu22.auto.tfvars to set the name of your jetstream keypair as well as your email address.
 3. Run ``` terraform apply``` and review the changes
 4. Once the ansible job has finished, it will output the domain name for your shiny server. https://shiny.(Jetstream Allocation Name here).projects.jetstream-cloud.org
 
