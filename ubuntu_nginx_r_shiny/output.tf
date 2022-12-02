@@ -23,7 +23,7 @@ resource "local_file" "email" {
 }
 
 resource "local_file" "domain_name" {
-  content  = var.domain_name
+  content  = "${openstack_compute_instance_v2.Ubuntu22.name}.${data.openstack_identity_auth_scope_v3.self_lookup.project_name}.projects.jetstream-cloud.org"
   filename = "ansible/domain_name.txt"
 }
 
