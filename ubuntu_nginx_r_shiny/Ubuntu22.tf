@@ -20,7 +20,7 @@ resource "openstack_compute_instance_v2" "Ubuntu22" {
   flavor_id  = var.flavor_id
   # you'll need to set this to your public key name on jetstream
   key_pair        = var.key_pair
-  security_groups = ["SSH and ICMP Ingress", "default", "HTTP/HTTPS Ingress"]
+  security_groups = ["${openstack_networking_secgroup_v2.ssh_ping_security_group.id}", "default", "${openstack_networking_secgroup_v2.http_https_security_group.id}"]
   metadata = {
     terraform_controlled = "yes"
     terraform_role       = "r_shiny"
