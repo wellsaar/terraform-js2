@@ -12,7 +12,7 @@ jetstream related instances.
 ## Instance 1
 
 Ubuntu server with Nginx and Maria db installed.
-1. setup ubuntu 20
+1. setup ubuntu 22
 2. make sure system is up to date
 3. install nginx
 4. install mongo,maria {bound to localhost}, and setup ufw firewall
@@ -22,7 +22,7 @@ Ubuntu server with Nginx and Maria db installed.
 
 Ubuntu server with nginx + r/shiny server
 
-1. setup ubuntu 20
+1. setup ubuntu 22
 2. make sure system is up to date
 3. install nginx
 4. install r and shiny
