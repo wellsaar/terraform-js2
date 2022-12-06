@@ -15,7 +15,7 @@ resource "openstack_compute_floatingip_associate_v2" "Ubuntu22_float" {
 }
 
 resource "openstack_compute_instance_v2" "Ubuntu22" {
-  name       = "shiny"
+  name       = (var.domain_name != "" ? var.domain_name : random_pet.cattle.id)
   image_name = "Featured-Ubuntu22"
   flavor_id  = var.flavor_id
   # you'll need to set this to your public key name on jetstream
@@ -70,4 +70,9 @@ resource "null_resource" "ansible_provisioners" {
 
 data "openstack_identity_auth_scope_v3" "self_lookup" {
   name = "self_lookup"
+}
+
+resource "random_pet" "cattle" {
+  length = 2
+  prefix = "shiny"
 }
