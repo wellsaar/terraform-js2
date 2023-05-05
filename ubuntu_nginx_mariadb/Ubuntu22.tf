@@ -15,7 +15,7 @@ resource "openstack_compute_floatingip_associate_v2" "ubuntu22_float" {
 }
 
 resource "openstack_compute_instance_v2" "ubuntu22" {
-  name = "nginx"
+  name =" ${data.openstack_identity_auth_scope_v3.self_lookup.user_name}-nginx"
   # ID of JS-API-Featured-ubuntu22-Latest
   #image_id  = var.image_id
   image_name = "Featured-Ubuntu22"
