@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   vars:
-    shiny_version: 1.5.19.995
+    shiny_version: 1.5.20.1002
     ssl_email: "{{ lookup('file', '~/ansible/email.txt') }}"
     domain_name: "{{ lookup('file', '~/ansible/domain_name.txt') }}"
 
