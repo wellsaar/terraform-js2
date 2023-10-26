@@ -7,7 +7,7 @@ resource "openstack_networking_floatingip_v2" "terraform_floatip_ubuntu22" {
   pool = "public"
 }
 
-# assigning floating ip from public pool to Ubuntu20 VM
+# assigning floating ip from public pool to Ubuntu22 VM
 resource "openstack_compute_floatingip_associate_v2" "Ubuntu22_float" {
   floating_ip           = openstack_networking_floatingip_v2.terraform_floatip_ubuntu22.address
   instance_id           = openstack_compute_instance_v2.Ubuntu22.id
